@@ -15,15 +15,16 @@ void setup() {
 
 void loop() {
     sensor.startSample();  // Starta en ny mätning
-    delay(10);  // Vänta en kort stund
+    delay(1);  // Vänta en kort stund
 
     while (!sensor.isSampleDone()) {
-        delay(10);  // Vänta tills sensorn är klar
+        delay(1);  // Vänta tills sensorn är klar
     }
 
     sensor.readOutputRegs();  // Läs ut mätdata
 
-    Serial.println(sensor.distanceMillimeters);  // Endast avstånd skrivs ut
+    int distance = sensor.distanceMillimeters;  // Spara avståndet i en variabel
+    Serial.println(distance);  // Skriv ut avståndet
 
-    delay(50);  // Vänta innan nästa mätning
+    delay(1);  // Vänta innan nästa mätning
 }
