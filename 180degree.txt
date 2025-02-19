@@ -1,60 +1,38 @@
-#include <stdint.h>
-#include <avr/io.h>
-#include <util/delay.h>
-#include <stdio.h>
+#include <Wire.h>
+#include "../include/OPT3101.h"
+#include <Arduino.h>
 
-// Function to initialize UART for printing
-void uart_init(void) {
-    // Set baud rate
-    uint16_t baud_rate = 103; // 9600 baud for 16 MHz clock
-    UBRR0H = (uint8_t)(baud_rate >> 8);
-    UBRR0L = (uint8_t)baud_rate;
-
-    // Enable transmitter
-    UCSR0B = (1 << TXEN0);
-
-    // Set frame format: 8 data bits, 1 stop bit
-    UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);
-}
-
-// Function to send a character over UART
-int uart_putchar(char c, FILE *stream) {
-    if (c == '\n') {
-        uart_putchar('\r', stream);
-    }
-    while (!(UCSR0A & (1 << UDRE0)));
-    UDR0 = c;
-    return 0;
-}
-
-// Setup the standard output stream
-FILE uart_output = FDEV_SETUP_STREAM(uart_putchar, NULL, _FDEV_SETUP_WRITE);
+// Skapa ett sensorobjekt
+OPT3101 sensor;
 
 void setup() {
-    // Initialize UART
-    uart_init();
+  // Starta seriell kommunikation för debug-utskrifter
+  Serial.begin(9600);
 
-    // Set the standard output to use UART
-    stdout = &uart_output;
+  // Initiera I²C på Arduino Nano ESP32 med A4 (SDA) och A5 (SCL)
+  Wire.begin();
 
-    // Enable internal pull-up resistors for SDA (A4) and SCL (A5)
-    DDRC &= ~((1 << DDC4) | (1 << DDC5)); // Set A4 and A5 as input
-    PORTC |= (1 << PORTC4) | (1 << PORTC5); // Enable pull-up resistors on A4 and A5
+  // Initiera sensorn och konfigurera den med standardinställningar
+  sensor.init();
+  sensor.configureDefault();
+
+  // Om du behöver ändra I²C-adressen (standard är 0x58) kan du använda:
+  // sensor.setAddress(0x58);
 }
 
-int main(void) {
-    setup();
+void loop() {
+  // Starta en mätning och hämta resultatet
+  sensor.sample();
 
-    while (1) {
-        // Placeholder for the distance value
-        int distanceMillimeters = 123; // Replace with actual sensor reading if available
+  // Skriv ut vilken kanal som användes, avståndet (i millimeter) och amplituden
+  Serial.print("Kanal: ");
+  Serial.print(sensor.channelUsed);
+  Serial.print(" | Avstånd: ");
+  Serial.print(sensor.distanceMillimeters);
+  Serial.print(" mm");
+  Serial.print(" | Amplitud: ");
+  Serial.println(sensor.amplitude);
 
-        // Print the distance measured by the sensor
-        printf("Distance: %d mm\n", distanceMillimeters);
-
-        // Delay for a short period before taking the next sample
-        _delay_ms(1000);
-    }
-
-    return 0;
+  // Kort paus mellan mätningarna
+  delay(1000);
 }

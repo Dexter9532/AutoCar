@@ -1,0 +1,55 @@
+#include <Wire.h>
+#include "OPT3101.h"
+#include <Arduino.h>
+#include <stdint.h>
+#include <util/delay.h>
+
+// Skapa ett sensorobjekt
+OPT3101 sensor;
+
+void setup() {
+    Serial.begin(9600);
+    Serial.println("🔍 Startar...");
+
+    Wire.begin();
+    Serial.println("✅ I2C initierat!");
+
+    Serial.println("🔍 Initierar OPT3101...");
+    sensor.init();
+    Serial.println("✅ OPT3101 initierad!");
+
+    sensor.configureDefault();
+    Serial.println("✅ Standardkonfiguration klar!");
+}
+
+
+void loop() {
+    Serial.println("🔄 Börjar loop...");
+
+    Serial.println("🔍 Startar mätning...");
+    sensor.startSample();
+    Serial.println("✅ startSample() anropad!");
+
+    delay(10);  // Vänta lite för säkerhet
+
+    Serial.println("🔍 Kollar om sample är klar...");
+    while (!sensor.isSampleDone()) {
+        Serial.print(".");  // Skriver ut punkter medan vi väntar
+        delay(100);
+    }
+    Serial.println("\n✅ Sample är klar!");
+
+    Serial.println("🔍 Läser ut data...");
+    sensor.readOutputRegs();
+    Serial.println("✅ Data läst!");
+
+    Serial.print("Kanal: ");
+    Serial.print(sensor.channelUsed);
+    Serial.print(" | 📏 Avstånd: ");
+    Serial.print(sensor.distanceMillimeters);
+    Serial.print(" mm | 📡 Amplitud: ");
+    Serial.println(sensor.amplitude);
+
+    delay(1000);
+}
+
