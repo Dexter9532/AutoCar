@@ -1,0 +1,21 @@
+const int ENA = 9;  // PWM för motor A
+const int IN1 = 8;
+const int IN2 = 7;
+
+void setup() {
+  pinMode(ENA, OUTPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+}
+
+void loop() {
+  analogWrite(ENA, 150); // Sätt hastighet (0-255)
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  delay(2000);
+
+  // Byt riktning
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  delay(2000);
+}
