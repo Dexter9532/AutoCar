@@ -53,4 +53,8 @@ void loop() {
     if (currentSpeedIndex >= 6) { // Om vi når slutet, börja om från 0
         currentSpeedIndex = 0;
     }
+<<<<<<< Updated upstream
 }
+=======
+}
+>>>>>>> Stashed changes

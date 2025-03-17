@@ -1,56 +1,23 @@
-#include <Arduino.h>
+#include <Servo.h>
 
-// Definiera motorstyrning
-#define L_EN 8    
-#define R_EN 7   
-#define L_PWM 5   
-#define R_PWM 6   
+#define SERVO_PIN 10 
 
-// Hastighetsnivåer
-const int speeds[] = {25, 50, 75, 100, 125, 150}; 
-int currentSpeedIndex = 0; // Startar på första hastigheten
+Servo steeringServo; 
 
 void setup() {
-    pinMode(L_EN, OUTPUT);
-    pinMode(R_EN, OUTPUT);
-    pinMode(L_PWM, OUTPUT);
-    pinMode(R_PWM, OUTPUT);
-
-    digitalWrite(L_EN, HIGH);
-    digitalWrite(R_EN, HIGH);
-
-    Serial.begin(115200); // Debugging
+  steeringServo.attach(SERVO_PIN);
 }
 
 void loop() {
-    int speed = speeds[currentSpeedIndex]; // Välj aktuell hastighet
+  /*en riktning*/
+  steeringServo.write(30);
+  delay(1000);
 
-    Serial.print("Nu kör vi med hastighet: ");
-    Serial.println(speed); // Skriv ut aktuell hastighet i Serial Monitor
+  /*rakt fram förhoppnings vis*/
+  steeringServo.write(90); 
+  delay(1000);
 
-    // Kör framåt i 3 sekunder
-    analogWrite(R_PWM, speed);
-    analogWrite(L_PWM, 0);
-    delay(3000);
-
-    // Stanna i 1 sekund
-    analogWrite(R_PWM, 0);
-    analogWrite(L_PWM, 0);
-    delay(1000);
-
-    // Kör bakåt i 3 sekunder
-    analogWrite(R_PWM, 0);
-    analogWrite(L_PWM, speed);
-    delay(3000);
-
-    // Stanna i 1 sekund
-    analogWrite(R_PWM, 0);
-    analogWrite(L_PWM, 0);
-    delay(1000);
-
-    // Byt till nästa hastighet
-    currentSpeedIndex++;
-    if (currentSpeedIndex >= 6) { // Om vi når slutet, börja om från 0
-        currentSpeedIndex = 0;
-    }
+  /*andra riktingen*/
+  steeringServo.write(150);
+  delay(1000);
 }
