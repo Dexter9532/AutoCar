@@ -1,48 +1,58 @@
-#include <Wire.h>
-#include <OPT3101.h>
 #include <Arduino.h>
 
-// Motor A (ansluten till M1 på L298N)
-int enA = 10;  // PWM-hastighet
-int in1 = 9;   // Riktning
-int in2 = 8;   // Riktning
+// Definiera motorstyrning
+#define L_EN 8    // Aktivera vänster kanal
+#define R_EN 7   // Aktivera höger kanal
+#define L_PWM 5   // PWM för vänster rotation (bakåt)
+#define R_PWM 6   // PWM för höger rotation (framåt)
 
 void setup() {
-  // Sätt motorpinnar som OUTPUT
-  pinMode(enA, OUTPUT);
-  pinMode(in1, OUTPUT);
-  pinMode(in2, OUTPUT);
-}
+    // Ställ in motorpinnar
+    pinMode(L_EN, OUTPUT);
+    pinMode(R_EN, OUTPUT);
+    pinMode(L_PWM, OUTPUT);
+    pinMode(R_PWM, OUTPUT);
 
-void demoOne() {
-  // Kör motor A framåt med 200/255 hastighet
-  digitalWrite(in1, HIGH);
-  digitalWrite(in2, LOW);
-  analogWrite(enA, 200);
-  delay(2000);
-}
-
-void demoTwo() {
-  // Accelerera motor A från 0 till full hastighet
-  digitalWrite(in1, LOW);
-  digitalWrite(in2, HIGH); // Kör bakåt
-  for (int i = 0; i < 256; i++) {
-    analogWrite(enA, i);
-    delay(20);
-  }
-
-  // Bromsa ner från full fart till 0
-  for (int i = 255; i >= 0; --i) {
-    analogWrite(enA, i);
-    delay(20);
-  }
-
-  // Stanna motorn
-  digitalWrite(in1, LOW);
-  digitalWrite(in2, LOW);
+    // Aktivera båda kanalerna
+    digitalWrite(L_EN, HIGH);
+    digitalWrite(R_EN, HIGH);
 }
 
 void loop() {
-  demoOne();
-  delay(1000);
+    int speed = 50; // PWM-hastighet (0-255)
+
+    // Kör framåt i 3 sekunder
+    analogWrite(R_PWM, speed);
+    analogWrite(L_PWM, 0);
+    delay(3000);
+
+    // Stanna i 1 sekund
+    analogWrite(R_PWM, 0);
+    analogWrite(L_PWM, 0);
+    delay(1000);
+
+    // Kör bakåt i 3 sekunder
+    analogWrite(R_PWM, 0);
+    analogWrite(L_PWM, speed);
+    delay(3000);
+
+    // Stanna i 1 sekund
+    analogWrite(R_PWM, 0);
+    analogWrite(L_PWM, 0);
+    delay(1000);
+
+    // Snabbt ryck framåt (0.5s)
+    analogWrite(R_PWM, speed);
+    analogWrite(L_PWM, 0);
+    delay(500);
+
+    // Snabbt ryck bakåt (0.5s)
+    analogWrite(R_PWM, 0);
+    analogWrite(L_PWM, speed);
+    delay(500);
+
+    // Stanna innan loopen startar om
+    analogWrite(R_PWM, 0);
+    analogWrite(L_PWM, 0);
+    delay(1000);
 }
