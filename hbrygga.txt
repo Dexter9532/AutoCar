@@ -19,7 +19,7 @@ void setup() {
     digitalWrite(L_EN, HIGH);
     digitalWrite(R_EN, HIGH);
 
-    Serial.begin(115200); // Debugging
+    Serial.begin(9600); // Debugging
 }
 
 void loop() {
@@ -53,8 +53,4 @@ void loop() {
     if (currentSpeedIndex >= 6) { // Om vi når slutet, börja om från 0
         currentSpeedIndex = 0;
     }
-<<<<<<< Updated upstream
 }
-=======
-}
->>>>>>> Stashed changes
