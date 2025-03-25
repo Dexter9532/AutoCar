@@ -15,11 +15,11 @@ Servo steeringServo;
 OPT3101 sensor;
 
 // === KONSTANTER ===
-const int targetDistance = 600;       // önskat avstånd i mm
-const int tolerance = 25;             // dödzon (mm)
+const int targetDistance = 450;       // önskat avstånd i mm
+const int tolerance = 20;             // dödzon (mm)
 const int maxDeviation = 120;          // hur mycket vi max bryr oss om (mm)
-const int maxSpeed = 60;
-const int minSpeed = 50;
+const int maxSpeed = 31;
+const int minSpeed = 30;
 
 void setup() {
     Serial.begin(9600);
@@ -59,10 +59,10 @@ void loop() {
         angle = 85; // rakt fram
     } else if (error > 0) {
         // för långt ifrån → sväng vänster
-        angle = 85 + map(constrain(error, 0, maxDeviation), 0, maxDeviation, 0, 20);
+        angle = 85 + map(constrain(error, 0, maxDeviation), 0, maxDeviation, 0, 25);
     } else {
         // för nära → sväng höger
-        angle = 85 - map(constrain(-error, 0, maxDeviation), 0, maxDeviation, 0, 20);
+        angle = 85 - map(constrain(-error, 0, maxDeviation), 0, maxDeviation, 0, 25);
     }
 
     angle = constrain(angle, 50, 120);
