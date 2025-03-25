@@ -6,8 +6,6 @@ void setup() {
   pinMode(A0, INPUT);       // höger IR-sensor
   pinMode(A1, INPUT);       // mitten IR-sensor
   pinMode(A2, INPUT);       // vänster IR-sensor
-  analogReference(DEFAULT); // säkerställ standardreferensspänning
-
 }
 
 void loop() {
@@ -15,7 +13,6 @@ void loop() {
   int irValue_middle = analogRead(A1);
   int irValue_left = analogRead(A2);
   int irValue_right = analogRead(A0);
-  
 
   // Skriv ut värdena
   Serial.print("IR mitt (A1): ");

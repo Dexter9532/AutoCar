@@ -15,11 +15,36 @@ Servo steeringServo;
 OPT3101 sensor;
 
 // === KONSTANTER ===
-const int targetDistance = 600;       // önskat avstånd i mm
-const int tolerance = 25;             // dödzon (mm)
-const int maxDeviation = 120;          // hur mycket vi max bryr oss om (mm)
-const int maxSpeed = 60;
-const int minSpeed = 50;
+const int targetDistance = 500;
+const int tolerance = 20;
+const int maxDeviation = 200;
+const int maxSpeed = 40;
+const int minSpeed = 39;
+
+const int servoCenter = 85;            //  JUSTERBART mittläge för servon
+const int stuckThreshold = 40;         // mm
+const unsigned long stuckTime = 1000;  // ms
+
+// === STUCK-DETEKTION ===
+int lastDistance = 0;
+unsigned long lastMoveTime = 0;
+
+// === FUNKTION: BAKÅT OCH VRID SERVOT FÖR ATT KOMMA LOSS ===
+void recoverFromStuck() {
+    Serial.println("⚠️ Fastnat! Försöker backa och vrida...");
+
+    analogWrite(L_PWM, maxSpeed);
+    analogWrite(R_PWM, 0);
+    steeringServo.write(servoCenter - 25); // styr snett vänster
+    delay(700);
+
+    analogWrite(L_PWM, 0);
+    analogWrite(R_PWM, 0);
+    delay(200);
+
+    steeringServo.write(servoCenter); // återställ till mitten
+    delay(200);
+}
 
 void setup() {
     Serial.begin(9600);
@@ -28,8 +53,8 @@ void setup() {
     sensor.init();
     sensor.configureDefault();
 
-    steeringServo.attach(SERVO_PIN);
-    steeringServo.write(85);  // rakt fram
+    steeringServo.attach(SERVO_PIN); 
+    steeringServo.write(servoCenter);
 
     pinMode(L_EN, OUTPUT);
     pinMode(R_EN, OUTPUT);
@@ -38,12 +63,14 @@ void setup() {
 
     digitalWrite(L_EN, HIGH);
     digitalWrite(R_EN, HIGH);
+
+    lastDistance = targetDistance;
+    lastMoveTime = millis();
 }
 
 void loop() {
     // === MÄT MED OTP3101 ===
     sensor.startSample();
-    delay(1);
     while (!sensor.isSampleDone()) delay(1);
     sensor.readOutputRegs();
     int distance = sensor.distanceMillimeters;
@@ -51,32 +78,39 @@ void loop() {
     Serial.print("Avstånd: ");
     Serial.println(distance);
 
-    // === BERÄKNA FEL OCH STYRNING ===
+    // === STUCK-DETEKTION ===
+    if (abs(distance - lastDistance) > stuckThreshold) {
+        lastMoveTime = millis();
+        lastDistance = distance;
+    }
+
+    if (millis() - lastMoveTime > stuckTime) {
+        recoverFromStuck();
+        lastMoveTime = millis();
+        return;
+    }
+
+    // === FELBERÄKNING OCH STYRNING ===
     int error = targetDistance - distance;
-    int angle = 85;
+    int angle = servoCenter;
 
     if (abs(error) < tolerance) {
-        angle = 85; // rakt fram
+        angle = servoCenter;
     } else if (error > 0) {
-        // för långt ifrån → sväng vänster
-        angle = 85 + map(constrain(error, 0, maxDeviation), 0, maxDeviation, 0, 20);
+        angle = servoCenter + map(constrain(error, 0, maxDeviation), 0, maxDeviation, 0, 23);
     } else {
-        // för nära → sväng höger
-        angle = 85 - map(constrain(-error, 0, maxDeviation), 0, maxDeviation, 0, 20);
+        angle = servoCenter - map(constrain(-error, 0, maxDeviation), 0, maxDeviation, 0, 23);
     }
 
     angle = constrain(angle, 50, 120);
     steeringServo.write(angle);
 
-    // === BERÄKNA HASTIGHET BASERAT PÅ FEL ===
+    // === HASTIGHET ===
     int absError = abs(error);
     absError = constrain(absError, 0, maxDeviation);
-
-    int speed = map(absError, 0, maxDeviation, maxSpeed, minSpeed); // mer fel = lägre fart
+    int speed = map(absError, 0, maxDeviation, maxSpeed, minSpeed);
     speed = constrain(speed, minSpeed, maxSpeed);
 
     analogWrite(R_PWM, speed);
-    analogWrite(L_PWM, 0); // kör bara höger motor framåt
-
-    delay(10);
+    analogWrite(L_PWM, 0);
 }
