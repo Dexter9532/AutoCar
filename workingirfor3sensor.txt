@@ -3,16 +3,19 @@
 void setup() {
   Serial.begin(9600);       // starta seriell kommunikation
 
-  pinMode(A0, INPUT);       // höger IR-sensor
-  pinMode(A1, INPUT);       // mitten IR-sensor
+  pinMode(A3, INPUT);       // mitten IR-sensor
+  pinMode(A1, INPUT);       // höger IR-sensor
   pinMode(A2, INPUT);       // vänster IR-sensor
+  analogReference(DEFAULT); // säkerställ standardreferensspänning
+
 }
 
 void loop() {
   // Läs analoga värden
-  int irValue_middle = analogRead(A1);
+  int irValue_middle = analogRead(A3);
   int irValue_left = analogRead(A2);
-  int irValue_right = analogRead(A0);
+  int irValue_right = analogRead(A1);
+  
 
   // Skriv ut värdena
   Serial.print("IR mitt (A1): ");
@@ -21,7 +24,7 @@ void loop() {
   Serial.print("IR vänster (A2): ");
   Serial.println(irValue_left);
 
-  Serial.print("IR höger (A0): ");
+  Serial.print("IR höger (A3): ");
   Serial.println(irValue_right);
 
   Serial.println("----------------------");

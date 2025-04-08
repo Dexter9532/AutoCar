@@ -4,14 +4,14 @@ void setup()
 {
   Serial.begin(9600);
 
-  pinMode(A4, INPUT); // Killpin
-  pinMode(A5, INPUT); // Killpin
+  pinMode(A4, INPUT_PULLUP); // Killpin
+  pinMode(A5, INPUT_PULLUP); // Killpin
   pinMode(4, OUTPUT);  // LED på digital pin 4
 }
 
 void loop()
 {
-  if (digitalRead(A4) == HIGH)
+  if (digitalRead(A4) == LOW)
   {
     digitalWrite(4, HIGH); // LED på
   }
