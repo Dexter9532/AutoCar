@@ -56,6 +56,11 @@ void setup() {
     steeringServo.attach(SERVO_PIN);
     steeringServo.write(servoCenter);
 
+    // ===STARTMODULE-PINS===
+    pinMode(A4, INPUT); // Killpin
+    pinMode(A5, INPUT); // Killpin
+    pinMode(4, OUTPUT);  // LED på digital pin 4
+
     pinMode(L_EN, OUTPUT);
     pinMode(R_EN, OUTPUT);
     pinMode(L_PWM, OUTPUT);
@@ -72,6 +77,11 @@ void setup() {
 }
 
 void loop() {
+
+    if (digitalRead(A4) == HIGH && digitalRead(A5) == HIGH)
+  {
+    digitalWrite(4, HIGH); // LED på
+
     int irLeft = analogRead(IR_LEFT);
     int irMiddle = analogRead(IR_MIDDLE);
     int irRight = analogRead(IR_RIGHT);
@@ -112,6 +122,17 @@ void loop() {
     // === MOTOR KÖR FRAMÅT ===
     analogWrite(R_PWM, maxSpeed);
     analogWrite(L_PWM, 0);
+  }
+  else{
 
-    delay(1);
+    digitalWrite(4,LOW); // LED av
+    analogWrite(L_PWM, 0);
+    analogWrite(R_PWM, 0); // Stanna motorerna
+    steeringServo.write(servoCenter); // Styr servon till mitten
+  }
+    delay(10);
+    Serial.print("A4 = ");
+    Serial.println(digitalRead(A4));
+    Serial.print("A5 = ");
+    Serial.println(digitalRead(A5));
 }
